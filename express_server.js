@@ -13,6 +13,16 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+function generateRandomString() {
+  let alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz"; 
+  let randomStr = [];
+  for (let i =0; i < 6; i++) {
+    randomStr.push(alphaNumericStr.charAt(Math.trunc(alphaNumericStr.length * Math.random())));
+  }  
+  return randomStr.join('');
+  
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 })
@@ -22,24 +32,23 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 })
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  
-  res.send("Ok");         
-});
-
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-function generateRandomString() {
-  let alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz"; 
-  let randomStr = [];
-  for (let i =0; i < 6; i++) {
-    randomStr.push(alphaNumericStr.charAt(Math.trunc(alphaNumericStr.length * Math.random())));
-    return randomStr.joint('');
-  }
+app.post("/urls", (req, res) => {
+  let shortURLN = "";
+  shortURLN = generateRandomString();
+  urlDatabase[shortURLN] = req.body.longURL;
+  const templateVars = {shortURL: shortURLN, longURL: req.body.longURL};
+  res.render("urls_show", templateVars)
+});
 
-}
+app.get("/u/:shortURL", (req, res) => {
+  console.log(req.params.shortURL);
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
@@ -49,10 +58,6 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 })
-
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
 
 
 app.get("/hello", (req, res) => {
