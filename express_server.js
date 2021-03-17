@@ -44,6 +44,16 @@ app.post("/urls", (req, res) => {
   res.render("urls_show", templateVars)
 });
 
+app.post("/urls/:shortURL/Edit", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  let shortURLN = "";
+  console.log(req.body.longURL);
+  shortURLN = generateRandomString();
+  urlDatabase[shortURLN] = req.body.longURL;
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   const templateVars = { urls: urlDatabase };
