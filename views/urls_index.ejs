@@ -19,15 +19,18 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <% if (username) { %>
           <th scope="col">Delete</th>
           <th scope="col">Edit</th>
+          <%} %>
         </tr>
       </thead>
       <tbody>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= urls[url].longURL %></td>
+            <% if (username) { %>
             <td> 
               <a href="/urls/<%= url %>">
               <button type="submit" class="btn btn-primary">Edit</button></a>
@@ -36,6 +39,7 @@
               <button type="submit" class="btn btn-primary">Delete</button>
             </form>
             </td>
+            <%} %>
           </tr>
         <% } %>
       </tbody>
