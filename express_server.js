@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
+
 
 app.set("view engine", "ejs");
 //   Database  ///
@@ -71,7 +73,8 @@ app.post("/urls/register", (req, res) => {
 
   let userId = Math.trunc(1000 * Math.random());
   if (req.body.email.includes("@") && !JSON.stringify(users).includes(req.body.email)) {
-    users[req.body.name] = { "id": userId, "email": req.body.email, "password": req.body.password};
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+    users[req.body.name] = { "id": userId, "email": req.body.email, "password": hashedPassword};
     res.redirect("/urls/login");
   } else {
    res.send("Error 400: Email address or password is not valid")
@@ -92,7 +95,7 @@ app.post("/urls/login", (req, res) => {
   let userId = 0;
   if (req.body.email.includes("@") && JSON.stringify(users).includes(req.body.email)) {
     for(let i = 0; i < Object.values(users).length; i++) {
-      if ((Object.values(users)[i].email === req.body.email) && (Object.values(users)[i].password === req.body.password)) {
+      if ((Object.values(users)[i].email === req.body.email) && (bcrypt.compareSync(req.body.password, Object.values(users)[i].password))) {
         username = Object.keys(users)[i];
         userId = Object.values(users)[i].id;
       }
