@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const helper = require('./helper');
 
 
 app.set("view engine", "ejs");
@@ -30,29 +31,10 @@ const users = {
 //    Middleware ///
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
-
-//    Callbacks ///
-
-function generateRandomString() {
-  let alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz"; 
-  let randomStr = [];
-  for (let i =0; i < 6; i++) {
-    randomStr.push(alphaNumericStr.charAt(Math.trunc(alphaNumericStr.length * Math.random())));
-  }  
-  return randomStr.join('');
-}
-
-function userSpecificURLS(userId) {
-  let myArr = {};
-  let myVal = Object.keys(urlDatabase);
-  for (let i = 0; i < myVal.length; i++) {
-      if (JSON.stringify(urlDatabase[myVal[i]]).includes(userId)) {
-        myArr[myVal[i]] = urlDatabase[myVal[i]];
-      };
-  }
-  return myArr;
-} 
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 
 
 //   Home Page ////
@@ -91,27 +73,25 @@ app.get("/urls/login", (req, res) => {
 //   Sign In Handler ////
 
 app.post("/urls/login", (req, res) => {
-  let username = "";
-  let userId = 0;
-  if (req.body.email.includes("@") && JSON.stringify(users).includes(req.body.email)) {
-    for(let i = 0; i < Object.values(users).length; i++) {
-      if ((Object.values(users)[i].email === req.body.email) && (bcrypt.compareSync(req.body.password, Object.values(users)[i].password))) {
-        username = Object.keys(users)[i];
-        userId = Object.values(users)[i].id;
-      }
+  if (req.body.email.includes("@")) {
+    let user = helper.getUserByEmail(req.body.email, users);
+    if (user && bcrypt.compareSync(req.body.password, user[1].password)) {
+      req.session.user_ID = user[1].id;
+      req.session.username = user[0];
+      res.redirect("/urls");
+    }else {
+      res.send("Error 403: Email address or password is not valid")
     }
-    res.cookie("user_ID",userId);
-    res.cookie("username",username);
-    res.redirect("/urls");
   } else {
    res.send("Error 403: Email address or password is not valid")
- }
+  }
 })
 
 //   Log Out Handler ////
 
 app.post("/urls/logout", (req, res) => {
-  res.clearCookie('username');
+  req.session.user_ID = null;
+  req.session.username = null;
   res.redirect("/urls/login");
 });
 
@@ -120,10 +100,10 @@ app.post("/urls/logout", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  const urlD = userSpecificURLS(req.cookies.user_ID);
+  const urlD = helper.userSpecificURLS(urlDatabase, req.session.user_ID);
   const templateVars = { 
     urls: urlD,
-    username: req.cookies.username
+    username: req.session.username
    };
   res.render("urls_index", templateVars);
 })
@@ -132,8 +112,8 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   
-  if (req.cookies.username) {
-    const templateVars = {username: req.cookies.username};
+  if (req.session.username) {
+    const templateVars = {username: req.session.username};
     res.render("urls_new", templateVars);
   } else res.redirect("/urls/login");
   
@@ -142,11 +122,11 @@ app.get("/urls/new", (req, res) => {
 //   New Short URL Handler ////
 
 app.post("/urls", (req, res) => {
-  if (req.cookies.username) {
+  if (req.session.username) {
     let shortURLN = "";
-    shortURLN = generateRandomString();
-    urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.cookies.user_ID};
-    const templateVars = { urls: urlDatabase, username: req.cookies.username};
+    shortURLN = helper.generateRandomString();
+    urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.session.user_ID};
+    const templateVars = { urls: urlDatabase, username: req.session.username};
     res.render("urls_index", templateVars)
   } else res.redirect("/urls/login");  
 });
@@ -154,13 +134,12 @@ app.post("/urls", (req, res) => {
 //   Edit Short URL Handler ////
 
 app.post("/urls/:shortURL/Edit", (req, res) => {
-  if (urlDatabase[req.params.shortURL].id === req.cookies.user_ID) {
+  if (urlDatabase[req.params.shortURL].id === req.session.user_ID) {
     delete urlDatabase[req.params.shortURL];
     console.log(req.body.longURL);
-    const shortURLN = generateRandomString();
-    urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.cookies.user_ID};
-    //const urlD = userSpecificURLS(urlDatabase, req.cookies.user_ID);
-    const templateVars = { urls: urlDatabase, username: req.cookies.username };
+    const shortURLN = helper.generateRandomString();
+    urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.session.user_ID};
+    const templateVars = { urls: urlDatabase, username: req.session.username };
     res.render("urls_index", templateVars);
   } else res.send("You don't own this Shortened URL");
 });
@@ -168,10 +147,9 @@ app.post("/urls/:shortURL/Edit", (req, res) => {
 //   Delete Short URL Handler ////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (urlDatabase[req.params.shortURL].id === req.cookies.user_ID) {
+  if (urlDatabase[req.params.shortURL].id === req.session.user_ID) {
     delete urlDatabase[req.params.shortURL];
-    //const urlD = userSpecificURLS(req.cookies.user_ID);
-    const templateVars = { urls: urlDatabase, username: req.cookies.username };
+    const templateVars = { urls: urlDatabase, username: req.session.username };
     res.render("urls_index", templateVars);
   } else res.send("You don't own this Shortened URL");
 });
@@ -184,7 +162,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: req.cookies.username};
+  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: req.session.username};
   res.render("urls_show", templateVars);
 })
 
