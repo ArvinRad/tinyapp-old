@@ -1,6 +1,6 @@
 const { assert } = require('chai');
-
-const { helper } = require('./helpers.js');
+const { express_server } = require('../express_server');
+const { helper } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -17,7 +17,7 @@ const testUsers = {
 
 describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
-    const user = helper.getUserByEmail("user@example.com", testusers)
+    const user = helper.getUserByEmail("user@example.com", testUsers)
     const expectedOutput = "userRandomID";
     assert.equal(user[1].id, expectedOutput);
 // Write your assert statement here

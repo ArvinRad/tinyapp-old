@@ -4,7 +4,7 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const helper = require('./helper');
+const helper = require('./helpers');
 
 
 app.set("view engine", "ejs");
@@ -40,14 +40,14 @@ app.use(cookieSession({
 //   Home Page ////
 app.get("/", (req, res) => {
   res.send("Hello World");
-})
+});
 
 //   Register Page  ////
 
 
 app.get("/urls/register", (req, res) => {
   res.render("register");
-})
+});
 
 //   Registration Handler ////
 
@@ -59,16 +59,16 @@ app.post("/urls/register", (req, res) => {
     users[req.body.name] = { "id": userId, "email": req.body.email, "password": hashedPassword};
     res.redirect("/urls/login");
   } else {
-   res.send("Error 400: Email address or password is not valid")
- }
-})
+  res.send("Error 400: Email address or password is not valid");
+  }
+});
 
 //   Sign In Page  ////
 
 
 app.get("/urls/login", (req, res) => {
   res.render("login");
-})
+});
 
 //   Sign In Handler ////
 
@@ -79,13 +79,13 @@ app.post("/urls/login", (req, res) => {
       req.session.user_ID = user[1].id;
       req.session.username = user[0];
       res.redirect("/urls");
-    }else {
-      res.send("Error 403: Email address or password is not valid")
+    } else {
+      res.send("Error 403: Email address or password is not valid");
     }
   } else {
-   res.send("Error 403: Email address or password is not valid")
+  res.send("Error 403: Email address or password is not valid");
   }
-})
+});
 
 //   Log Out Handler ////
 
@@ -104,9 +104,9 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlD,
     username: req.session.username
-   };
+  };
   res.render("urls_index", templateVars);
-})
+});
 
 //   New Short URL Page ////
 
@@ -127,8 +127,10 @@ app.post("/urls", (req, res) => {
     shortURLN = helper.generateRandomString();
     urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.session.user_ID};
     const templateVars = { urls: urlDatabase, username: req.session.username};
-    res.render("urls_index", templateVars)
-  } else res.redirect("/urls/login");  
+    res.render("urls_index", templateVars);
+  } else {
+    res.redirect("/urls/login");
+  }  
 });
 
 //   Edit Short URL Handler ////
@@ -164,14 +166,16 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username: req.session.username};
   res.render("urls_show", templateVars);
-})
+});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-})
+});
 
 
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-})
+});
+
+
