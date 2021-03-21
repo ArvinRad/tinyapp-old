@@ -10,42 +10,21 @@
 </head>
 <body>
   <header>
-    <%- include('partials/_header') %>
+    <nav class="navbar navbar-expand-md navbar-dark bg-success">
+      <a class="navbar-brand" href="/urls">TinyApp</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" href="login"> Log in HERE</a>
+            <a class="nav-item nav-link" href="register"> Don't have an account! Register HERE</a>
+        </div>
+      </div>
+    </nav>
   </header>
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <% if (username) { %>
-          <th scope="col">Short URL</th>
-          <th scope="col">Long URL</th>
-          <th scope="col">Delete</th>
-          <th scope="col">Edit</th>
-          <%} else {%>
-          <th scope="col">Please sign in (or register if you don't have an account) to show your URLs</th> 
-          <%} %>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(let url in urls) { %>
-          <tr>
-            <td><%= url %></td>
-            <td><%= urls[url].longURL %></td>
-            <% if (username) { %>
-            <td> 
-              <a href="/urls/<%= url %>">
-              <button type="submit" class="btn btn-primary">Edit</button></a>
-            </td>
-            <td> <form method="POST" action="/urls/<%= url %>/delete"> 
-              <button type="submit" class="btn btn-primary">Delete</button>
-            </form>
-            </td>
-            <%} %>
-          </tr>
-        <% } %>
-      </tbody>
-    </table>
+    <h3>This Tinyapp is dedicated to its users. Please register or sign in if you have an account to show your URLs and their short form.</h3>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

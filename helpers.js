@@ -1,8 +1,8 @@
 const getUserByEmail = function(email2, database) {
   let myUsers = Object.entries(database);
-  let theUser = false;
-  for (let i =0; i < myUsers.length; i++) {
-    if (myUsers[i][1].email == email2) {
+  let theUser;
+  for (let i = 0; i < myUsers.length; i++) {
+    if (myUsers[i][1].email === email2) {
       theUser = myUsers[i];
     }
   } 
@@ -12,22 +12,22 @@ const getUserByEmail = function(email2, database) {
 const generateRandomString = function() {
   let alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz"; 
   let randomStr = [];
-  for (let i =0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     randomStr.push(alphaNumericStr.charAt(Math.trunc(alphaNumericStr.length * Math.random())));
   }  
   return randomStr.join('');
 }
 
-const userSpecificURLS = function(urlDatabase,userId) {
+const userSpecificURLS = function(urlDatabase0,userId) {
   let myArr = {};
-  let myVal = Object.keys(urlDatabase);
+  let myVal = Object.keys(urlDatabase0);
   for (let i = 0; i < myVal.length; i++) {
-      if (JSON.stringify(urlDatabase[myVal[i]]).includes(userId)) {
-        myArr[myVal[i]] = urlDatabase[myVal[i]];
+      if ((urlDatabase0[myVal[i]]).id === userId) {
+        myArr[myVal[i]] = urlDatabase0[myVal[i]];
       };
   }
   return myArr;
 } 
 
 
-module.exports = {getUserByEmail: getUserByEmail, generateRandomString: generateRandomString, userSpecificURLS: userSpecificURLS}
+module.exports = {getUserByEmail, generateRandomString, userSpecificURLS}
