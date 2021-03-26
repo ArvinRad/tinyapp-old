@@ -1,3 +1,5 @@
+//   Find a User by Email //
+
 const getUserByEmail = function(email2, database) {
   let myUsers = Object.entries(database);
   let theUser;
@@ -9,16 +11,20 @@ const getUserByEmail = function(email2, database) {
   return theUser;
 }
 
+//   Generate a Random String   //
+
 const generateRandomString = function() {
-  let alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz"; 
-  let randomStr = [];
+  let alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvxyz"; 
+  let randomString = [];
   for (let i = 0; i < 6; i++) {
-    randomStr.push(alphaNumericStr.charAt(Math.trunc(alphaNumericStr.length * Math.random())));
+    randomString.push(alphaNumericString.charAt(Math.trunc(alphaNumericString.length * Math.random())));
   }  
-  return randomStr.join('');
+  return randomString.join('');
 }
 
-const userSpecificURLS = function(urlDatabase0,userId) {
+//  Find User Specific URLS //
+
+const userSpecificUrls = function(urlDatabase0,userId) {
   let myArr = {};
   let myVal = Object.keys(urlDatabase0);
   for (let i = 0; i < myVal.length; i++) {
@@ -30,4 +36,4 @@ const userSpecificURLS = function(urlDatabase0,userId) {
 } 
 
 
-module.exports = {getUserByEmail, generateRandomString, userSpecificURLS}
+module.exports = {getUserByEmail, generateRandomString, userSpecificUrls}

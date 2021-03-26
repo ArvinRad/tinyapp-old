@@ -6,24 +6,9 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const helper = require('./helpers');
 
-
 app.set("view engine", "ejs");
 
-
-//   Database Structure  ///
-
-const urlDatabase = {
-  "shortURL": { longURL: "http://********.***", id: 00 }
-};
-const users = {
-  Name: {
-    id: 00,
-    email: "****@*****.***",
-    password: '*****'
-  }
-};
-
-//    Middleware ///
+//    Middleware //
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -31,20 +16,23 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
+//   Database Structure  //
 
-//   Home Page ////
+const urlDatabase = {};
+const users = {};
+
+//   Home Page //
 app.get("/", (req, res) => {
   res.render("home");
 });
 
-//   Register Page  ////
-
+//   Register Page  //
 
 app.get("/register", (req, res) => {
   res.render("register");
 });
 
-//   Registration Handler ////
+//   Registration Handler //
 
 app.post("/register", (req, res) => {
 
@@ -58,14 +46,14 @@ app.post("/register", (req, res) => {
   }
 });
 
-//   Sign In Page  ////
+//   Sign In Page  //
 
 
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
-//   Sign In Handler ////
+//   Sign In Handler //
 
 app.post("/login", (req, res) => {
   if (req.body.email.includes("@")) {
@@ -82,7 +70,7 @@ app.post("/login", (req, res) => {
   }
 });
 
-//   Log Out Handler ////
+//   Log Out Handler //
 
 app.post("/logout", (req, res) => {
   req.session.user_ID = null;
@@ -91,7 +79,7 @@ app.post("/logout", (req, res) => {
 });
 
 
-//   Main URL Handler ////
+//   Main URL Handler //
 
 app.get("/urls", (req, res) => {
    const urlD = helper.userSpecificURLS(urlDatabase, req.session.user_ID);
@@ -102,7 +90,7 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
 });
 
-//   New Short URL Page ////
+//   New Short URL Page //
 
 app.get("/urls/new", (req, res) => {
   
@@ -114,7 +102,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//   New Short URL Handler ////
+//   New Short URL Handler //
 
 app.post("/urls", (req, res) => {
   if (req.session.username) {
@@ -126,30 +114,27 @@ app.post("/urls", (req, res) => {
       urls: urlD, 
       username: req.session.username
     };
-    res.render("urls_index", templateVars);
+    res.redirect(req.body.longURL);
   } else {
     res.redirect("/login");
   }  
 });
 
-//   Edit Short URL Handler ////
+//   Edit Short URL Handler //
 
 app.post("/urls/:shortURL/Edit", (req, res) => {
   if (urlDatabase[req.params.shortURL].id === req.session.user_ID) {
     delete urlDatabase[req.params.shortURL];
-    console.log(req.body.longURL);
-    const shortURLN = helper.generateRandomString();
-    urlDatabase[shortURLN] = {"longURL": req.body.longURL, "id": req.session.user_ID};
-    const urlD = helper.userSpecificURLS(urlDatabase, req.session.user_ID);
+    urlDatabase[helper.generateRandomString()] = {"longURL": req.body.longURL, "id": req.session.user_ID};
     const templateVars = { 
-      urls: urlD, 
+      urls: helper.userSpecificURLS(urlDatabase, req.session.user_ID), 
       username: req.session.username
     };
     res.render("urls_index", templateVars);
   } else res.send("You don't own this Shortened URL");
 });
 
-//   Delete Short URL Handler ////
+//   Delete Short URL Handler //
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (urlDatabase[req.params.shortURL].id === req.session.user_ID) {
@@ -163,10 +148,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   } else res.send("You don't own this Shortened URL");
 });
 
-//    Short**2 URL Handler ////
+//    Short**2 URL Handler //
 
 app.get("/u/:shortURL", (req, res) => {
-  if (req.session.username && urlDatabase[req.params.shortURL]) {
+  if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     res.redirect(longURL);
   } else {
@@ -188,8 +173,6 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

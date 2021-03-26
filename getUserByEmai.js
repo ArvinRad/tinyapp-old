@@ -1,3 +1,5 @@
+//    Find a User by Email //
+
 const getUserByEmail = function(email, database) {
   let myData = Object.values(database);
   let res = {};
